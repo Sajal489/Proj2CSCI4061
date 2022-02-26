@@ -1,0 +1,4 @@
+>> cat test_commands/2.txt | ./run_terminal_session | dos2unix
+@> pwd
+/mnt/d/My_Programs/School/csci4061/proj2-code/code
+@> exit

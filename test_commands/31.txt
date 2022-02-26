@@ -1,0 +1,10 @@
+wc
+^Z
+wc -l -m
+^Z
+cat
+^Z
+wc -L
+^Z
+jobs
+exit

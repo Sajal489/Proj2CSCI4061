@@ -1,0 +1,45 @@
+* (TEST 49) Attempt to Wait for Stopped Job
+COMMENTS:
+Start a program, suspend it, then attempt to wait for it. Check if the shell
+prints out an appropriate error message.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE(137) due to TIMEOUT: Runtime exceeded maximum of '10s'
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-49-expect.tmp
+- Actual output in: test-results/raw/swish-49-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/49.txt | ./run_terminal_session | dos2unix   >> cat test_commands/49.txt | ./run_terminal_session | dos2unix
+@> wc                                                           | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> wait-for 0                                                   <
+Job index is for stopped process not background process         <
+Failed to wait for background job                               <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+      0       0       0                                         <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> wc
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: wc (stopped)
+EXPECT:   5) @> wait-for 0
+EXPECT:   6) Job index is for stopped process not background process
+EXPECT:   7) Failed to wait for background job
+EXPECT:   8) @> jobs
+EXPECT:   9) 0: wc (stopped)
+EXPECT:  10) @> fg 0
+EXPECT:  11)       0       0       0
+EXPECT:  12) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

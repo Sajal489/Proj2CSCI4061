@@ -1,0 +1,5 @@
+>> echo foo > out.txt
+>> cat test_commands/19.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w test_data/gatsby.txt >> out.txt
+@> cat out.txt
+@> exit

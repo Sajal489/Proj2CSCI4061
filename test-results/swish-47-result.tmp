@@ -1,0 +1,55 @@
+* (TEST 47) Wait for All Background Programs
+COMMENTS:
+Use the 'wait-all' command to wait for all background programs to terminate.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-47-expect.tmp
+- Actual output in: test-results/raw/swish-47-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/47.txt | ./run_terminal_session | dos2unix   >> cat test_commands/47.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 0 out.txt &                                   | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+@> ./slow_write 3 0 out2.txt &                                  <
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+1: ./slow_write (background)                                    <
+@> wait-all                                                     <
+@> jobs                                                         <
+@> cat out.txt                                                  <
+1                                                               <
+2                                                               <
+@> cat out2.txt                                                 <
+1                                                               <
+2                                                               <
+3                                                               <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> ./slow_write 2 0 out.txt &
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: ./slow_write (background)
+EXPECT:   5) @> ./slow_write 3 0 out2.txt &
+EXPECT:   6) @> jobs
+EXPECT:   7) 0: ./slow_write (background)
+EXPECT:   8) 1: ./slow_write (background)
+EXPECT:   9) @> wait-all
+EXPECT:  10) @> jobs
+EXPECT:  11) @> cat out.txt
+EXPECT:  12) 1
+EXPECT:  13) 2
+EXPECT:  14) @> cat out2.txt
+EXPECT:  15) 1
+EXPECT:  16) 2
+EXPECT:  17) 3
+EXPECT:  18) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

@@ -1,0 +1,98 @@
+* (TEST 46) Wait for Programs with Stopped Jobs
+COMMENTS:
+Start up several programs and suspend some while leaving others in background.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE(137) due to TIMEOUT: Runtime exceeded maximum of '10s'
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-46-expect.tmp
+- Actual output in: test-results/raw/swish-46-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/46.txt | ./run_terminal_session | dos2unix   >> cat test_commands/46.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 1 out.txt &                                   | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+@> wc                                                           <
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+1: wc (stopped)                                                 <
+@> ./slow_write 3 0 out2.txt &                                  <
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+1: wc (stopped)                                                 <
+2: ./slow_write (background)                                    <
+@> wc                                                           <
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+1: wc (stopped)                                                 <
+2: ./slow_write (background)                                    <
+3: wc (stopped)                                                 <
+@> wait-for 0                                                   <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+1: ./slow_write (background)                                    <
+2: wc (stopped)                                                 <
+@> wait-for 1                                                   <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+1: wc (stopped)                                                 <
+@> cat out.txt                                                  <
+1                                                               <
+2                                                               <
+@> fg 0                                                         <
+      0       0       0                                         <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+      0       0       0                                         <
+@> jobs                                                         <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> ./slow_write 2 1 out.txt &
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: ./slow_write (background)
+EXPECT:   5) @> wc
+EXPECT:   6) @> jobs
+EXPECT:   7) 0: ./slow_write (background)
+EXPECT:   8) 1: wc (stopped)
+EXPECT:   9) @> ./slow_write 3 0 out2.txt &
+EXPECT:  10) @> jobs
+EXPECT:  11) 0: ./slow_write (background)
+EXPECT:  12) 1: wc (stopped)
+EXPECT:  13) 2: ./slow_write (background)
+EXPECT:  14) @> wc
+EXPECT:  15) @> jobs
+EXPECT:  16) 0: ./slow_write (background)
+EXPECT:  17) 1: wc (stopped)
+EXPECT:  18) 2: ./slow_write (background)
+EXPECT:  19) 3: wc (stopped)
+EXPECT:  20) @> wait-for 0
+EXPECT:  21) @> jobs
+EXPECT:  22) 0: wc (stopped)
+EXPECT:  23) 1: ./slow_write (background)
+EXPECT:  24) 2: wc (stopped)
+EXPECT:  25) @> wait-for 1
+EXPECT:  26) @> jobs
+EXPECT:  27) 0: wc (stopped)
+EXPECT:  28) 1: wc (stopped)
+EXPECT:  29) @> cat out.txt
+EXPECT:  30) 1
+EXPECT:  31) 2
+EXPECT:  32) @> fg 0
+EXPECT:  33)       0       0       0
+EXPECT:  34) @> jobs
+EXPECT:  35) 0: wc (stopped)
+EXPECT:  36) @> fg 0
+EXPECT:  37)       0       0       0
+EXPECT:  38) @> jobs
+EXPECT:  39) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

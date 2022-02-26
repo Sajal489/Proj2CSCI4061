@@ -1,0 +1,10 @@
+>> echo foo > out.txt
+>> cat test_commands/14.txt | ./run_terminal_session | dos2unix
+@> cat out.txt
+foo
+@> cd test_data
+@> ls > ../out.txt
+@> cat ../out.txt
+gatsby.txt
+quote.txt
+@> exit

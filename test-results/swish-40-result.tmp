@@ -1,0 +1,68 @@
+* (TEST 40) Clean up Multiple Interrupted Jobs
+COMMENTS:
+Run several commands, suspend them, then resume and interrupt them.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE(137) due to TIMEOUT: Runtime exceeded maximum of '10s'
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-40-expect.tmp
+- Actual output in: test-results/raw/swish-40-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/40.txt | ./run_terminal_session | dos2unix   >> cat test_commands/40.txt | ./run_terminal_session | dos2unix
+@> wc                                                           | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+@> jobs                                                         <
+@> wc                                                           <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+@> jobs                                                         <
+@> wc                                                           <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> wc                                                           <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+1: wc (stopped)                                                 <
+@> fg 0                                                         <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+@> jobs                                                         <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> wc
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: wc (stopped)
+EXPECT:   5) @> fg 0
+EXPECT:   6) @> jobs
+EXPECT:   7) @> wc
+EXPECT:   8) @> jobs
+EXPECT:   9) 0: wc (stopped)
+EXPECT:  10) @> fg 0
+EXPECT:  11) @> jobs
+EXPECT:  12) @> wc
+EXPECT:  13) @> jobs
+EXPECT:  14) 0: wc (stopped)
+EXPECT:  15) @> wc
+EXPECT:  16) @> jobs
+EXPECT:  17) 0: wc (stopped)
+EXPECT:  18) 1: wc (stopped)
+EXPECT:  19) @> fg 0
+EXPECT:  20) @> jobs
+EXPECT:  21) 0: wc (stopped)
+EXPECT:  22) @> fg 0
+EXPECT:  23) @> jobs
+EXPECT:  24) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

@@ -1,0 +1,7 @@
+wc
+^C
+echo foo
+cat
+^C
+echo bar
+exit

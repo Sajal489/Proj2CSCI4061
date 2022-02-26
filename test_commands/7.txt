@@ -1,0 +1,8 @@
+pwd
+cd /
+pwd
+cd __HOME_DIR__
+pwd
+cd /
+pwd
+exit

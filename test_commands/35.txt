@@ -1,0 +1,38 @@
+wc
+^Z
+jobs
+cat
+^Z
+jobs
+wc -l
+^Z
+jobs
+fg 1
+^Z
+jobs
+fg 2
+^Z
+jobs
+fg 1
+>> this is a test
+^Z
+jobs
+fg 0
+>> this is a test
+^D
+jobs
+fg 1
+>> of your shell
+^Z
+jobs
+fg 0
+>> and its capabilities
+^Z
+jobs
+fg 0
+>> regarding job handling
+^D
+fg 0
+>> the end
+^D
+exit

@@ -1,0 +1,28 @@
+* (TEST 19) Append Output from Command with Arguments to File
+COMMENTS:
+Run a command with several arguments and redirect its input from a file.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-19-expect.tmp
+- Actual output in: test-results/raw/swish-19-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> echo foo > out.txt                                             >> echo foo > out.txt
+>> cat test_commands/19.txt | ./run_terminal_session | dos2unix   >> cat test_commands/19.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w test_data/gatsby.txt >> out.txt              @> wc -c -m -l -L -w test_data/gatsby.txt >> out.txt
+@> cat out.txt                                                    @> cat out.txt
+foo                                                             <
+  6772 51257 289900 299452 74 test_data/gatsby.txt              <
+@> exit                                                           @> exit
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   5) foo
+EXPECT:   6)   6772 51257 289900 299452 74 test_data/gatsby.txt
+

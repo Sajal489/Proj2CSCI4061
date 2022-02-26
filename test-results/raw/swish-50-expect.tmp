@@ -1,0 +1,25 @@
+>> cat test_commands/50.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 4 0 > out.txt &
+@> jobs
+0: ./slow_write (background)
+@> ./slow_write 8 0 > out2.txt &
+@> jobs
+0: ./slow_write (background)
+1: ./slow_write (background)
+@> wait-all
+@> jobs
+@> cat out.txt
+1
+2
+3
+4
+@> cat out2.txt
+1
+2
+3
+4
+5
+6
+7
+8
+@> exit

@@ -1,0 +1,3 @@
+>> cat test_commands/15.txt | ./run_terminal_session | dos2unix
+@> wc < test_data/gatsby.txt
+@> exit

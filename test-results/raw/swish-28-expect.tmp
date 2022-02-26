@@ -1,0 +1,8 @@
+>> cat test_commands/28.txt | ./run_terminal_session | dos2unix
+@> wc
+@> echo foo
+foo
+@> cat
+@> echo bar
+bar
+@> exit

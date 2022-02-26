@@ -1,0 +1,9 @@
+wc < test_data/quote.txt > out.txt
+jobs
+wc < test_data/gatsby.txt > out2.txt
+jobs
+wait-all
+jobs
+cat out.txt
+cat out2.txt
+exit

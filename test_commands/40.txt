@@ -1,0 +1,25 @@
+wc
+^Z
+jobs
+fg 0
+^C
+jobs
+wc
+^Z
+jobs
+fg 0
+^C
+jobs
+wc
+^Z
+jobs
+wc
+^Z
+jobs
+fg 0
+^C
+jobs
+fg 0
+^C
+jobs
+exit

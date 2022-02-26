@@ -1,0 +1,70 @@
+* (TEST 50) Run Background Programs with Output Redirection
+COMMENTS:
+Run programs with their output redirected in the background. Then check
+that the files have been properly modified.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-50-expect.tmp
+- Actual output in: test-results/raw/swish-50-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/50.txt | ./run_terminal_session | dos2unix   >> cat test_commands/50.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 4 0 > out.txt &                                 | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+@> ./slow_write 8 0 > out2.txt &                                <
+@> jobs                                                         <
+0: ./slow_write (background)                                    <
+1: ./slow_write (background)                                    <
+@> wait-all                                                     <
+@> jobs                                                         <
+@> cat out.txt                                                  <
+1                                                               <
+2                                                               <
+3                                                               <
+4                                                               <
+@> cat out2.txt                                                 <
+1                                                               <
+2                                                               <
+3                                                               <
+4                                                               <
+5                                                               <
+6                                                               <
+7                                                               <
+8                                                               <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> ./slow_write 4 0 > out.txt &
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: ./slow_write (background)
+EXPECT:   5) @> ./slow_write 8 0 > out2.txt &
+EXPECT:   6) @> jobs
+EXPECT:   7) 0: ./slow_write (background)
+EXPECT:   8) 1: ./slow_write (background)
+EXPECT:   9) @> wait-all
+EXPECT:  10) @> jobs
+EXPECT:  11) @> cat out.txt
+EXPECT:  12) 1
+EXPECT:  13) 2
+EXPECT:  14) 3
+EXPECT:  15) 4
+EXPECT:  16) @> cat out2.txt
+EXPECT:  17) 1
+EXPECT:  18) 2
+EXPECT:  19) 3
+EXPECT:  20) 4
+EXPECT:  21) 5
+EXPECT:  22) 6
+EXPECT:  23) 7
+EXPECT:  24) 8
+EXPECT:  25) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

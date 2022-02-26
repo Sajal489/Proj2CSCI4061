@@ -1,0 +1,7 @@
+>> cat test_commands/10.txt | ./run_terminal_session | dos2unix
+@> cat test_data/quote.txt
+Premature optimization is the root of all evil.
+    -- Donald Knuth
+@> wc test_data/gatsby.txt
+  6772  51257 299452 test_data/gatsby.txt
+@> exit

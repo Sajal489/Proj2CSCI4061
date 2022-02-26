@@ -1,0 +1,10 @@
+pwd
+cd test_data
+pwd
+cd ..
+pwd
+cd test_data
+pwd
+cd ..
+pwd
+exit

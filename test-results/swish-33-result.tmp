@@ -1,0 +1,83 @@
+* (TEST 33) Resume multiple stopped jobs in foreground
+COMMENTS:
+Run several interactive jobs, suspend them, then resume in the foreground
+and complete them. Check output of jobs to verify.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE(137) due to TIMEOUT: Runtime exceeded maximum of '10s'
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-33-expect.tmp
+- Actual output in: test-results/raw/swish-33-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/33.txt | ./run_terminal_session | dos2unix   >> cat test_commands/33.txt | ./run_terminal_session | dos2unix
+@> wc                                                           | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> cat                                                          <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+1: cat (stopped)                                                <
+@> wc -l                                                        <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+1: cat (stopped)                                                <
+2: wc (stopped)                                                 <
+@> fg 1                                                         <
+this is a test                                                  <
+this is a test                                                  <
+of your shell program                                           <
+of your shell program                                           <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+1: wc (stopped)                                                 <
+@> fg 0                                                         <
+this is a test                                                  <
+  1 4 15                                                        <
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+this is a test                                                  <
+1                                                               <
+@> jobs                                                         <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> wc
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: wc (stopped)
+EXPECT:   5) @> cat
+EXPECT:   6) @> jobs
+EXPECT:   7) 0: wc (stopped)
+EXPECT:   8) 1: cat (stopped)
+EXPECT:   9) @> wc -l
+EXPECT:  10) @> jobs
+EXPECT:  11) 0: wc (stopped)
+EXPECT:  12) 1: cat (stopped)
+EXPECT:  13) 2: wc (stopped)
+EXPECT:  14) @> fg 1
+EXPECT:  15) this is a test
+EXPECT:  16) this is a test
+EXPECT:  17) of your shell program
+EXPECT:  18) of your shell program
+EXPECT:  19) @> jobs
+EXPECT:  20) 0: wc (stopped)
+EXPECT:  21) 1: wc (stopped)
+EXPECT:  22) @> fg 0
+EXPECT:  23) this is a test
+EXPECT:  24)   1 4 15
+EXPECT:  25) @> jobs
+EXPECT:  26) 0: wc (stopped)
+EXPECT:  27) @> fg 0
+EXPECT:  28) this is a test
+EXPECT:  29) 1
+EXPECT:  30) @> jobs
+EXPECT:  31) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

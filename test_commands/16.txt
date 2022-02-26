@@ -1,0 +1,5 @@
+cd test_data
+ls >> ../out.txt
+ls >> ../out.txt
+cat ../out.txt
+exit

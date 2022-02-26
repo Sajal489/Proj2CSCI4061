@@ -1,0 +1,6 @@
+./slow_write 5 0 out.txt &
+./slow_write 4 0 out2.txt &
+sleep 1
+cat out.txt
+cat out2.txt
+exit

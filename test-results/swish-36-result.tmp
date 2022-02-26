@@ -1,0 +1,29 @@
+* (TEST 36) Out of Bounds Resume Index
+COMMENTS:
+Tries to resume a non-existent job with the 'fg' command.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-36-expect.tmp
+- Actual output in: test-results/raw/swish-36-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/36.txt | ./run_terminal_session | dos2unix   >> cat test_commands/36.txt | ./run_terminal_session | dos2unix
+@> fg 0                                                         | bash: line 1: dos2unix: command not found
+Job index out of bounds                                         <
+Failed to resume job in foreground                              <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> fg 0
+EXPECT:   3) Job index out of bounds
+EXPECT:   4) Failed to resume job in foreground
+EXPECT:   5) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

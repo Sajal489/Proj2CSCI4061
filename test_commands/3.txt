@@ -1,0 +1,4 @@
+pwd
+cd test_data
+pwd
+exit

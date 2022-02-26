@@ -1,0 +1,4 @@
+>> cat test_commands/10.txt | ./run_terminal_session | dos2unix
+@> cat test_data/quote.txt
+@> wc test_data/gatsby.txt
+@> exit

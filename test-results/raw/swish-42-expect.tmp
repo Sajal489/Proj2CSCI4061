@@ -1,0 +1,16 @@
+>> cat test_commands/42.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 5 0 out.txt &
+@> ./slow_write 4 0 out2.txt &
+@> sleep 1
+@> cat out.txt
+1
+2
+3
+4
+5
+@> cat out2.txt
+1
+2
+3
+4
+@> exit

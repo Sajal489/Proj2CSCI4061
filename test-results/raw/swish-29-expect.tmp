@@ -1,0 +1,5 @@
+>> cat test_commands/29.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> exit

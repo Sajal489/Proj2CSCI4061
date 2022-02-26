@@ -1,0 +1,978 @@
+#+TITLE: swish Shell Tests
+#+TESTY: PREFIX="swish"
+#+TESTY: TIMEOUT="10s"
+#+TESTY: SHOW=1
+
+* Startup, Prompt, and Exit
+Starts up a swish shell, which should prompt for input  and then exit
+when instructed to.
+
+#+BEGIN_SRC sh
+>> cat test_commands/1.txt | ./run_terminal_session | dos2unix
+@> exit
+#+END_SRC
+
+
+* Print Current Working Directory
+Starts up a swish shell and prints the current working directory.
+
+#+BEGIN_SRC sh
+>> cat test_commands/2.txt | ./run_terminal_session | dos2unix
+@> pwd
+{{STARTING_DIR}}
+@> exit
+#+END_SRC
+
+
+* Change Current Working Directory
+Prints the current working directory, changes to the 'test_data' directory,
+then prints the current working directory again.
+
+#+BEGIN_SRC sh
+>> cat test_commands/3.txt | ./run_terminal_session | dos2unix
+@> pwd
+{{STARTING_DIR}}
+@> cd test_data
+@> pwd
+{{STARTING_DIR}}/test_data
+@> exit
+#+END_SRC
+
+
+* Change to Home Directory
+Uses the 'cd' command without any arguments to change to the user's
+home directory.
+
+#+BEGIN_SRC sh
+>> cat test_commands/4.txt | ./run_terminal_session | dos2unix
+@> pwd
+{{STARTING_DIR}}
+@> cd
+@> pwd
+{{HOME_DIR}}
+@> exit
+#+END_SRC
+
+
+* Multiple Directory Changes
+Starts up a swish shell and changes back and forth between starting directory
+and test directory.
+
+#+BEGIN_SRC sh
+>> cat test_commands/5.txt | ./run_terminal_session | dos2unix
+@> pwd
+{{STARTING_DIR}}
+@> cd test_data
+@> pwd
+{{STARTING_DIR}}/test_data
+@> cd ..
+@> pwd
+{{STARTING_DIR}}
+@> cd test_data
+@> pwd
+{{STARTING_DIR}}/test_data
+@> cd ..
+@> pwd
+{{STARTING_DIR}}
+@> exit
+#+END_SRC
+
+* Change Current Directory (Absolute Path)
+Change the current directory using an absolute path as argument.
+#+BEGIN_SRC sh
+>> sed "s#__HOME_DIR__#$HOME#g" test_commands/6.txt | ./run_terminal_session | dos2unix
+@> pwd
+{{STARTING_DIR}}
+@> cd {{HOME_DIR}}
+@> pwd
+{{HOME_DIR}}
+@> exit
+#+END_SRC
+
+
+* Multiple Directory Changes (Absolute Paths)
+Starts up a swish shell and changes back and forth between different directories
+identified by absolute and relative paths.
+
+#+BEGIN_SRC sh
+>> sed "s#__HOME_DIR__#$HOME#g" test_commands/7.txt | ./run_terminal_session | dos2unix
+@> pwd
+{{STARTING_DIR}}
+@> cd /
+@> pwd
+/
+@> cd {{HOME_DIR}}
+@> pwd
+{{HOME_DIR}}
+@> cd /
+@> pwd
+/
+@> exit
+#+END_SRC
+
+
+* Change to Non-Existent Directory
+Attempts to change to a non-existent directory. Shell should print out
+an appropriate error message.
+
+#+BEGIN_SRC sh
+>> cat test_commands/8.txt | ./run_terminal_session | dos2unix
+@> cd this_directory_does_not_exist
+chdir: No such file or directory
+@> exit
+#+ END_SRC
+
+
+* Execute a Basic command
+Changes to 'test_data' directory and does an 'ls' command
+
+#+BEGIN_SRC sh
+>> cat test_commands/9.txt | ./run_terminal_session | dos2unix
+@> cd test_data
+@> ls
+gatsby.txt quote.txt
+@> exit
+#+END_SRC
+
+* Execute Commands with a Single Argument
+Execute the 'cat' and 'wc' commands with a single argument
+
+#+BEGIN_SRC sh
+>> cat test_commands/10.txt | ./run_terminal_session | dos2unix
+@> cat test_data/quote.txt
+Premature optimization is the root of all evil.
+    -- Donald Knuth
+@> wc test_data/gatsby.txt
+  6772  51257 299452 test_data/gatsby.txt
+@> exit
+#+END_SRC
+
+* Execute a Command with Several arguments
+Execute the 'wc' command with several command-line arguments
+
+#+BEGIN_SRC sh
+>> cat test_commands/11.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w test_data/gatsby.txt
+  6772 51257 289900 299452 74 test_data/gatsby.txt
+@> exit
+#+END_SRC
+
+* Execute a Non-Existent Command
+Attempt to run a program that does not exist. Shell should print out an
+appropriate message.
+
+#+BEGIN_SRC sh
+>> cat test_commands/12.txt | ./run_terminal_session | dos2unix
+@> ./this_program_does_not_exist
+exec: No such file or directory
+@> exit
+#+END_SRC
+
+* Redirect Output to File
+Run a 'ls' and redirect its output to a file. Then cat this file to
+display its contents.
+
+#+BEGIN_SRC sh
+>> cat test_commands/13.txt | ./run_terminal_session | dos2unix
+@> cd test_data
+@> ls > ../out.txt
+@> cat ../out.txt
+gatsby.txt
+quote.txt
+@> exit
+#+END_SRC
+
+
+* Output Redirection Overwrites File
+Run a 'ls' and redirect its output to a file. Then cat this file to
+display its contents and verify that old version of file is overwritten.
+
+#+BEGIN_SRC sh
+>> echo foo > out.txt
+>> cat test_commands/14.txt | ./run_terminal_session | dos2unix
+@> cat out.txt
+foo
+@> cd test_data
+@> ls > ../out.txt
+@> cat ../out.txt
+gatsby.txt
+quote.txt
+@> exit
+#+END_SRC
+
+
+* Redirect Input From File
+Run 'wc' with its input coming from a file.
+
+#+BEGIN_SRC sh
+>> cat test_commands/15.txt | ./run_terminal_session | dos2unix
+@> wc < test_data/gatsby.txt
+  6772 51257 299452
+@> exit
+#+END_SRC
+
+
+* Append Output to File
+Run 'ls' first to create a new output file, then run it a second time and
+append to this file instead. Then 'cat' the file to display its contents.
+
+#+BEGIN_SRC sh
+>> rm -f out.txt
+>> cat test_commands/16.txt | ./run_terminal_session | dos2unix
+@> cd test_data
+@> ls >> ../out.txt
+@> ls >> ../out.txt
+@> cat ../out.txt
+gatsby.txt
+quote.txt
+gatsby.txt
+quote.txt
+@> exit
+#+END_SRC
+
+
+* Redirect Output from Command with Arguments to File
+Run a command with several arguments and redirect its output to a file.
+'cat' this file to display its contents
+
+#+BEGIN_SRC sh
+>> cat test_commands/17.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w test_data/gatsby.txt > out.txt
+@> cat out.txt
+  6772 51257 289900 299452 74 test_data/gatsby.txt
+@> exit
+#+END_SRC
+
+
+* Redirect Input to Command with Arguments from File
+Run a command with several arguments and redirect its input from a file.
+
+#+BEGIN_SRC sh
+>> cat test_commands/18.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w < test_data/gatsby.txt
+  6772 51257 289900 299452 74
+@> exit
+#+END_SRC
+
+
+* Append Output from Command with Arguments to File
+Run a command with several arguments and redirect its input from a file.
+
+#+BEGIN_SRC sh
+>> echo foo > out.txt
+>> cat test_commands/19.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w test_data/gatsby.txt >> out.txt
+@> cat out.txt
+foo
+  6772 51257 289900 299452 74 test_data/gatsby.txt
+@> exit
+#+END_SRC
+
+
+* Attempt to Redirect Input from Non-Existent File
+Attempt to run a command with input redirected from a non-existent file.
+The shell should print out an appropriate error message.
+
+#+BEGIN_SRC sh
+>> cat test_commands/20.txt | ./run_terminal_session | dos2unix
+@> wc < this_file_does_not_exist.txt
+Failed to open input file: No such file or directory
+@> exit
+#+END_SRC
+
+
+* Redirect both Input and Output
+Run the 'cat' command with both input and output redirected. The command
+effectively copies a file. Then 'cat' this copy to display its contents.
+
+#+BEGIN_SRC sh
+>> cat test_commands/21.txt | ./run_terminal_session | dos2unix
+@> cat < test_data/quote.txt > out.txt
+@> cat out.txt
+Premature optimization is the root of all evil.
+    -- Donald Knuth
+@> exit
+#+END_SRC
+
+
+* Redirect Input and Append Output
+Run the 'cat' command with both input and output redirected, but appending
+rather than overwriting output file. Then 'cat' the output file.
+
+#+BEGIN_SRC sh
+>> echo foo > out.txt
+>> cat test_commands/22.txt | ./run_terminal_session | dos2unix
+@> cat < test_data/quote.txt >> out.txt
+@> cat out.txt
+foo
+Premature optimization is the root of all evil.
+    -- Donald Knuth
+@> exit
+#+END_SRC
+
+
+* Redirect Input and Output with Arguments
+Run 'wc' with several command line arguments, redirecting both input and output.
+
+#+BEGIN_SRC sh
+>> cat test_commands/23.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w < test_data/gatsby.txt > out.txt
+@> cat out.txt
+  6772 51257 289900 299452 74
+@> exit
+#+END_SRC
+
+
+* Redirect Input and Append to Output with Arguments
+Run 'wc' with several command line arguments, redirecting input and appending output.
+
+#+BEGIN_SRC sh
+>> echo foo > out.txt
+>> cat test_commands/24.txt | ./run_terminal_session | dos2unix
+@> wc -c -m -l -L -w < test_data/gatsby.txt >> out.txt
+@> cat out.txt
+foo
+  6772 51257 289900 299452 74
+@> exit
+#+END_SRC
+
+* Interrupt Running Process
+Run an interactive command that blocks the shell and interrupt it. The shell
+should resume and accept additional commands.
+
+#+BEGIN_SRC sh
+>> cat test_commands/25.txt | ./run_terminal_session | dos2unix
+@> wc
+@> echo foo
+foo
+@> exit
+#+END_SRC
+
+
+* Multiple Interrupts
+Run several interactive commands, each of which will block the shell. Interrupt
+each command and verify that the shell resumes each time.
+
+#+BEGIN_SRC sh
+>> cat test_commands/26.txt | ./run_terminal_session | dos2unix
+@> wc
+@> echo foo
+foo
+@> cat
+@> echo bar
+bar
+@> exit
+#+END_SRC
+
+
+* Suspend Running Process
+Run an interactive command that blocks the shell and suspend it. The shell
+should resume and accept additional commands.
+
+#+BEGIN_SRC sh
+>> cat test_commands/27.txt | ./run_terminal_session | dos2unix
+@> wc
+@> echo foo
+foo
+@> exit
+#+END_SRC
+
+
+* Multiple Suspends
+Run several interactive commands, each of which will block the shell. Suspend
+each command and verify that the shell resumes each time.
+
+#+BEGIN_SRC sh
+>> cat test_commands/28.txt | ./run_terminal_session | dos2unix
+@> wc
+@> echo foo
+foo
+@> cat
+@> echo bar
+bar
+@> exit
+#+END_SRC
+
+
+* Track Stopped Job
+Run an interactive command, suspend it, and use the 'jobs' command to
+list all stopped/background jobs.
+
+#+BEGIN_SRC sh
+>> cat test_commands/29.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> exit
+#+END_SRC
+
+
+* Track Stopped Job with Args
+Run an interactive command with arguments, suspend it, and use the 'jobs'
+command to list all stopped/background jobs.
+
+#+BEGIN_SRC sh
+>> cat test_commands/30.txt | ./run_terminal_session | dos2unix
+@> wc -l -m
+@> jobs
+0: wc (stopped)
+@> exit
+#+END_SRC
+
+
+* Track Several Stopped Jobs
+Run several interactive commands, suspend each of them, and use the 'jobs'
+command to list all stopped/background jobs.
+
+#+BEGIN_SRC sh
+>> cat test_commands/31.txt | ./run_terminal_session | dos2unix
+@> wc
+@> wc -l -m
+@> cat
+@> wc -L
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+2: cat (stopped)
+3: wc (stopped)
+@> exit
+#+END_SRC
+
+
+* Resume stopped job in foreground
+Run an interactive job, suspend it, then resume it in foreground and
+complete it. Check output of 'jobs' to verify.
+
+#+BEGIN_SRC sh
+>> cat test_commands/32.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> fg 0
+this is a test
+  1 4 15
+@> exit
+#+END_SRC
+
+
+* Resume multiple stopped jobs in foreground
+Run several interactive jobs, suspend them, then resume in the foreground
+and complete them. Check output of jobs to verify.
+
+#+BEGIN_SRC sh
+>> cat test_commands/33.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> cat
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+@> wc -l
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 1
+this is a test
+this is a test
+of your shell program
+of your shell program
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+@> fg 0
+this is a test
+  1 4 15
+@> jobs
+0: wc (stopped)
+@> fg 0
+this is a test
+1
+@> jobs
+@> exit
+#+END_SRC
+
+
+* Multiple Suspends and Resumes of One program
+Starts and then repeatedly suspends and resumes one program.
+
+#+BEGIN_SRC sh
+>> cat test_commands/34.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> fg 0
+@> jobs
+0: wc (stopped)
+@> fg 0
+this is yet another test
+@> jobs
+0: wc (stopped)
+@> fg 0
+of your shell implementation
+and its job handling
+@> jobs
+0: wc (stopped)
+@> fg 0
+  3 13 75
+@> exit
+#+END_SRC
+
+
+* Multiple Suspends and Resumes of Multiple Programs
+
+#+BEGIN_SRC sh
+>> cat test_commands/35.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> cat
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+@> wc -l
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 1
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 2
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 1
+this is a test
+this is a test
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 0
+this is a test
+      1       4      15
+@> jobs
+0: cat (stopped)
+1: wc (stopped)
+@> fg 1
+of your shell
+@> jobs
+0: cat (stopped)
+1: wc (stopped)
+@> fg 0
+and its capabilities
+and its capabilities
+@> jobs
+0: cat (stopped)
+1: wc (stopped)
+@> fg 0
+regarding job handling
+regarding job handling
+@> fg 0
+the end
+2
+@> exit
+#+END_SRC
+
+* Out of Bounds Resume Index
+Tries to resume a non-existent job with the 'fg' command.
+
+#+BEGIN_SRC sh
+>> cat test_commands/36.txt | ./run_terminal_session | dos2unix
+@> fg 0
+Job index out of bounds
+Failed to resume job in foreground
+@> exit
+#+END_SRC
+
+
+* Multiple Out of Bounds Resume Index
+Tries to resume several non-existent job with the 'fg' command.
+
+#+BEGIN_SRC sh
+>> cat test_commands/37.txt | ./run_terminal_session | dos2unix
+@> fg 4
+Job index out of bounds
+Failed to resume job in foreground
+@> fg 8
+Job index out of bounds
+Failed to resume job in foreground
+@> fg 15
+Job index out of bounds
+Failed to resume job in foreground
+@> exit
+#+END_SRC
+
+
+* Out of Bounds Index with Existing Jobs
+Attempt to resume non-existent job when jobs list is non-empty.
+
+#+BEGIN_SRC sh
+>> cat test_commands/38.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> fg 1
+Job index out of bounds
+Failed to resume job in foreground
+@> fg 0
+      0       0       0
+@> jobs
+@> exit
+#+END_SRC
+
+
+* Clean up Interrupted Job
+Run a command and suspend it, then resume it with 'fg'. Interrupt
+the program and run 'jobs' to ensure it was removed from jobs list.
+
+#+BEGIN_SRC sh
+>> cat test_commands/39.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> fg 0
+@> jobs
+@> exit
+#END_SRC
+
+* Clean up Multiple Interrupted Jobs
+Run several commands, suspend them, then resume and interrupt them.
+
+#+BEGIN_SRC sh
+>> cat test_commands/40.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> fg 0
+@> jobs
+@> wc
+@> jobs
+0: wc (stopped)
+@> fg 0
+@> jobs
+@> wc
+@> jobs
+0: wc (stopped)
+@> wc
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+@> fg 0
+@> jobs
+0: wc (stopped)
+@> fg 0
+@> jobs
+@> exit
+#END_SRC
+
+* Run Simple Program in Background
+Run a simple command in the background and check that it completes.
+
+#+BEGIN_SRC sh
+>> cat test_commands/41.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 5 0 out.txt &
+@> sleep 1
+@> cat out.txt
+1
+2
+3
+4
+5
+@> exit
+#END_SRC
+
+
+* Run Multiple Programs in Background
+Start multiple programs in the background and check that they both complete.
+
+#+BEGIN_SRC sh
+>> cat test_commands/42.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 5 0 out.txt &
+@> ./slow_write 4 0 out2.txt &
+@> sleep 1
+@> cat out.txt
+1
+2
+3
+4
+5
+@> cat out2.txt
+1
+2
+3
+4
+@> exit
+#END_SRC
+
+
+* Suspend Program and Resume in Background
+Use the 'bg' command to resume a stopped program in the background. Then
+verify that the program completes.
+
+#+BEGIN_SRC sh
+>> cat test_commands/43.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 3 1 out.txt
+@> jobs
+0: ./slow_write (stopped)
+@> bg 0
+@> jobs
+0: ./slow_write (background)
+@> sleep 4
+@> cat out.txt
+1
+2
+3
+@> exit
+#END_SRC
+
+* Wait for a Background Program
+Use the 'wait-for' command to wait until a program finishes.
+
+#+BEGIN_SRC sh
+>> cat test_commands/44.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 1 out.txt &
+@> jobs
+0: ./slow_write (background)
+@> wait-for 0
+@> cat out.txt
+1
+2
+@> jobs
+@> exit
+#END_SRC
+
+
+* Wait for Multiple Background Programs
+Use the 'wait-for' command to wait for a program to terminate and repeat.
+
+#+BEGIN_SRC sh
+>> cat test_commands/45.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 1 out.txt &
+@> jobs
+0: ./slow_write (background)
+@> wait-for 0
+@> cat out.txt
+1
+2
+@> jobs
+@> ./slow_write 2 1 out.txt &
+@> jobs
+0: ./slow_write (background)
+@> wait-for 0
+@> cat out.txt
+1
+2
+@> jobs
+@> exit
+#END_SRC
+
+* Wait for Programs with Stopped Jobs
+Start up several programs and suspend some while leaving others in background.
+
+#+BEGIN_SRC sh
+>> cat test_commands/46.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 1 out.txt &
+@> jobs
+0: ./slow_write (background)
+@> wc
+@> jobs
+0: ./slow_write (background)
+1: wc (stopped)
+@> ./slow_write 3 0 out2.txt &
+@> jobs
+0: ./slow_write (background)
+1: wc (stopped)
+2: ./slow_write (background)
+@> wc
+@> jobs
+0: ./slow_write (background)
+1: wc (stopped)
+2: ./slow_write (background)
+3: wc (stopped)
+@> wait-for 0
+@> jobs
+0: wc (stopped)
+1: ./slow_write (background)
+2: wc (stopped)
+@> wait-for 1
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+@> cat out.txt
+1
+2
+@> fg 0
+      0       0       0
+@> jobs
+0: wc (stopped)
+@> fg 0
+      0       0       0
+@> jobs
+@> exit
+#END_SRC
+
+* Wait for All Background Programs
+Use the 'wait-all' command to wait for all background programs to terminate.
+
+#+BEGIN_SRC sh
+>> cat test_commands/47.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 0 out.txt &
+@> jobs
+0: ./slow_write (background)
+@> ./slow_write 3 0 out2.txt &
+@> jobs
+0: ./slow_write (background)
+1: ./slow_write (background)
+@> wait-all
+@> jobs
+@> cat out.txt
+1
+2
+@> cat out2.txt
+1
+2
+3
+@> exit
+#END_SRC
+
+* Wait for All Background Programs with Stopped Jobs
+Use the 'wait-all' command to wait for all background programs to terminate,
+while ignoring any suspend jobs that are present.
+
+#+BEGIN_SRC sh
+>> cat test_commands/48.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 2 1 out.txt &
+@> jobs
+0: ./slow_write (background)
+@> wc
+@> jobs
+0: ./slow_write (background)
+1: wc (stopped)
+@> ./slow_write 3 0 out2.txt &
+@> jobs
+0: ./slow_write (background)
+1: wc (stopped)
+2: ./slow_write (background)
+@> wc
+@> jobs
+0: ./slow_write (background)
+1: wc (stopped)
+2: ./slow_write (background)
+3: wc (stopped)
+@> wait-all
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+@> cat out.txt
+1
+2
+@> cat out2.txt
+1
+2
+3
+@> fg 0
+      0       0       0
+@> jobs
+0: wc (stopped)
+@> fg 0
+      0       0       0
+@> jobs
+@> exit
+#+END_SRC
+
+
+* Attempt to Wait for Stopped Job
+Start a program, suspend it, then attempt to wait for it. Check if the shell
+prints out an appropriate error message.
+
+#+BEGIN_SRC sh
+>> cat test_commands/49.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> wait-for 0
+Job index is for stopped process not background process
+Failed to wait for background job
+@> jobs
+0: wc (stopped)
+@> fg 0
+      0       0       0
+@> exit
+#+END_SRC sh
+
+
+* Run Background Programs with Output Redirection
+Run programs with their output redirected in the background. Then check
+that the files have been properly modified.
+
+#+BEGIN_SRC sh
+>> cat test_commands/50.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 4 0 > out.txt &
+@> jobs
+0: ./slow_write (background)
+@> ./slow_write 8 0 > out2.txt &
+@> jobs
+0: ./slow_write (background)
+1: ./slow_write (background)
+@> wait-all
+@> jobs
+@> cat out.txt
+1
+2
+3
+4
+@> cat out2.txt
+1
+2
+3
+4
+5
+6
+7
+8
+@> exit
+#+END_SRC
+
+
+* Run Background Programs with Input and Output Redirection
+Run programs with both input and output redirected in the background. Then check
+the files produced.
+
+#+BEGIN_SRC sh
+>> cat test_commands/51.txt | ./run_terminal_session | dos2unix
+@> wc < test_data/quote.txt > out.txt
+@> jobs
+@> wc < test_data/gatsby.txt > out2.txt
+@> jobs
+@> wait-all
+@> jobs
+@> cat out.txt
+ 2 11 68
+@> cat out2.txt
+  6772  51257 299452
+@> exit
+#+END_SRC
+
+
+* Attempt to Resume Non-Existent Job in Background
+Try to resume a job in the background that does not exist.
+
+#+BEGIN_SRC _sh
+>> cat test_commands/52.txt| ./run_terminal_session | dos2unix
+@> bg 0
+Job index out of bounds
+Failed to resume job in background
+@> wc
+@> bg 1
+Job index out of bounds
+Failed to resume job in background
+@> fg 0
+      0       0       0
+@> exit
+#+END_SRC

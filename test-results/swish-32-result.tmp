@@ -1,0 +1,37 @@
+* (TEST 32) Resume stopped job in foreground
+COMMENTS:
+Run an interactive job, suspend it, then resume it in foreground and
+complete it. Check output of 'jobs' to verify.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE(137) due to TIMEOUT: Runtime exceeded maximum of '10s'
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-32-expect.tmp
+- Actual output in: test-results/raw/swish-32-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/32.txt | ./run_terminal_session | dos2unix   >> cat test_commands/32.txt | ./run_terminal_session | dos2unix
+@> wc                                                           | bash: line 1: dos2unix: command not found
+@> jobs                                                         <
+0: wc (stopped)                                                 <
+@> fg 0                                                         <
+this is a test                                                  <
+  1 4 15                                                        <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> wc
+EXPECT:   3) @> jobs
+EXPECT:   4) 0: wc (stopped)
+EXPECT:   5) @> fg 0
+EXPECT:   6) this is a test
+EXPECT:   7)   1 4 15
+EXPECT:   8) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

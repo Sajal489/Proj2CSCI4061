@@ -1,0 +1,9 @@
+./slow_write 4 0 > out.txt &
+jobs
+./slow_write 8 0 > out2.txt &
+jobs
+wait-all
+jobs
+cat out.txt
+cat out2.txt
+exit

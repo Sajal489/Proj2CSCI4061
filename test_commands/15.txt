@@ -1,0 +1,2 @@
+wc < test_data/gatsby.txt
+exit

@@ -1,0 +1,4 @@
+>> cat test_commands/12.txt | ./run_terminal_session | dos2unix
+@> ./this_program_does_not_exist
+exec: No such file or directory
+@> exit

@@ -1,0 +1,54 @@
+>> cat test_commands/35.txt | ./run_terminal_session | dos2unix
+@> wc
+@> jobs
+0: wc (stopped)
+@> cat
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+@> wc -l
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 1
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 2
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 1
+this is a test
+this is a test
+@> jobs
+0: wc (stopped)
+1: cat (stopped)
+2: wc (stopped)
+@> fg 0
+this is a test
+      1       4      15
+@> jobs
+0: cat (stopped)
+1: wc (stopped)
+@> fg 1
+of your shell
+@> jobs
+0: cat (stopped)
+1: wc (stopped)
+@> fg 0
+and its capabilities
+and its capabilities
+@> jobs
+0: cat (stopped)
+1: wc (stopped)
+@> fg 0
+regarding job handling
+regarding job handling
+@> fg 0
+the end
+2
+@> exit

@@ -1,0 +1,39 @@
+* (TEST 41) Run Simple Program in Background
+COMMENTS:
+Run a simple command in the background and check that it completes.
+
+** program: bash -v
+
+** --- Failure messages --- 
+- FAILURE: Output Mismatch at lines marked
+
+** --- Side by Side Differences ---
+- Expect output in: test-results/raw/swish-41-expect.tmp
+- Actual output in: test-results/raw/swish-41-actual.tmp
+- Differing lines have a character like '|' '>' or '<' in the middle
+#+BEGIN_SRC sbs-diff
+==== EXPECT ====                                                  ==== ACTUAL ====                                               
+>> cat test_commands/41.txt | ./run_terminal_session | dos2unix   >> cat test_commands/41.txt | ./run_terminal_session | dos2unix
+@> ./slow_write 5 0 out.txt &                                   | bash: line 1: dos2unix: command not found
+@> sleep 1                                                      <
+@> cat out.txt                                                  <
+1                                                               <
+2                                                               <
+3                                                               <
+4                                                               <
+5                                                               <
+@> exit                                                         <
+#+END_SRC
+
+** --- Line Differences ---
+EXPECT:   2) @> ./slow_write 5 0 out.txt &
+EXPECT:   3) @> sleep 1
+EXPECT:   4) @> cat out.txt
+EXPECT:   5) 1
+EXPECT:   6) 2
+EXPECT:   7) 3
+EXPECT:   8) 4
+EXPECT:   9) 5
+EXPECT:  10) @> exit
+ACTUAL:   2) bash: line 1: dos2unix: command not found
+

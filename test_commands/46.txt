@@ -1,0 +1,22 @@
+./slow_write 2 1 out.txt &
+jobs
+wc
+^Z
+jobs
+./slow_write 3 0 out2.txt &
+jobs
+wc
+^Z
+jobs
+wait-for 0
+jobs
+wait-for 1
+jobs
+cat out.txt
+fg 0
+^D
+jobs
+fg 0
+^D
+jobs
+exit

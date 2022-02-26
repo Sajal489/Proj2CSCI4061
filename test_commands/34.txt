@@ -1,0 +1,18 @@
+wc
+^Z
+jobs
+fg 0
+^Z
+jobs
+fg 0
+>> this is yet another test
+^Z
+jobs
+fg 0
+>> of your shell implementation
+>> and its job handling
+^Z
+jobs
+fg 0
+^D
+exit
