@@ -19,9 +19,11 @@ Changes to 'test_data' directory and does an 'ls' command
 @> ls                                                            @> ls
 gatsby.txt quote.txt                                           <
 @> exit                                                          @> exit
+                                                               > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 ACTUAL:   3) chdir: No such file or directory
 EXPECT:   4) gatsby.txt quote.txt
+ACTUAL:   6) @> 
 

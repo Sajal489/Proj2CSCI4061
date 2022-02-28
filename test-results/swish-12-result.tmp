@@ -18,8 +18,10 @@ appropriate message.
 @> ./this_program_does_not_exist                                  @> ./this_program_does_not_exist
 exec: No such file or directory                                 <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   3) exec: No such file or directory
+ACTUAL:   4) @> 
 

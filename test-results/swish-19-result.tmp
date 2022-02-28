@@ -20,9 +20,11 @@ Run a command with several arguments and redirect its input from a file.
 foo                                                             <
   6772 51257 289900 299452 74 test_data/gatsby.txt              <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   5) foo
 EXPECT:   6)   6772 51257 289900 299452 74 test_data/gatsby.txt
+ACTUAL:   6) @> 
 

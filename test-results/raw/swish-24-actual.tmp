@@ -3,3 +3,4 @@
 @> wc -c -m -l -L -w < test_data/gatsby.txt >> out.txt
 @> cat out.txt
 @> exit
+@> 

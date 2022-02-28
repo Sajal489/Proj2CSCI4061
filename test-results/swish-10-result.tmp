@@ -20,10 +20,12 @@ Premature optimization is the root of all evil.                 <
 @> wc test_data/gatsby.txt                                        @> wc test_data/gatsby.txt
   6772  51257 299452 test_data/gatsby.txt                       <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   3) Premature optimization is the root of all evil.
 EXPECT:   4)     -- Donald Knuth
 EXPECT:   6)   6772  51257 299452 test_data/gatsby.txt
+ACTUAL:   5) @> 
 

@@ -26,6 +26,7 @@ quote.txt                                                       <
 gatsby.txt                                                      <
 quote.txt                                                       <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
@@ -34,4 +35,5 @@ EXPECT:   7) gatsby.txt
 EXPECT:   8) quote.txt
 EXPECT:   9) gatsby.txt
 EXPECT:  10) quote.txt
+ACTUAL:   9) @> 
 

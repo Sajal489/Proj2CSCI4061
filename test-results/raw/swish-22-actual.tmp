@@ -3,3 +3,4 @@
 @> cat < test_data/quote.txt >> out.txt
 @> cat out.txt
 @> exit
+@> 

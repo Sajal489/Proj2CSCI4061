@@ -20,9 +20,11 @@ effectively copies a file. Then 'cat' this copy to display its contents.
 Premature optimization is the root of all evil.                 <
     -- Donald Knuth                                             <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   4) Premature optimization is the root of all evil.
 EXPECT:   5)     -- Donald Knuth
+ACTUAL:   5) @> 
 

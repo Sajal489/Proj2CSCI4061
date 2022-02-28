@@ -18,8 +18,10 @@ The shell should print out an appropriate error message.
 @> wc < this_file_does_not_exist.txt                              @> wc < this_file_does_not_exist.txt
 Failed to open input file: No such file or directory            <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   3) Failed to open input file: No such file or directory
+ACTUAL:   4) @> 
 

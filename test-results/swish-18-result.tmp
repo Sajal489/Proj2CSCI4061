@@ -17,8 +17,10 @@ Run a command with several arguments and redirect its input from a file.
 @> wc -c -m -l -L -w < test_data/gatsby.txt                       @> wc -c -m -l -L -w < test_data/gatsby.txt
   6772 51257 289900 299452 74                                   <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   3)   6772 51257 289900 299452 74
+ACTUAL:   4) @> 
 

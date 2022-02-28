@@ -25,6 +25,7 @@ foo                                                             <
 gatsby.txt                                                      <
 quote.txt                                                       <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
@@ -32,4 +33,5 @@ EXPECT:   4) foo
 ACTUAL:   5) chdir: No such file or directory
 EXPECT:   8) gatsby.txt
 EXPECT:   9) quote.txt
+ACTUAL:   9) @> 
 

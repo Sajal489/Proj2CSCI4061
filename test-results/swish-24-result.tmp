@@ -20,9 +20,11 @@ Run 'wc' with several command line arguments, redirecting input and appending ou
 foo                                                             <
   6772 51257 289900 299452 74                                   <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   5) foo
 EXPECT:   6)   6772 51257 289900 299452 74
+ACTUAL:   6) @> 
 

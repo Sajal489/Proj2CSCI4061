@@ -22,10 +22,12 @@ display its contents.
 gatsby.txt                                                      <
 quote.txt                                                       <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 ACTUAL:   3) chdir: No such file or directory
 EXPECT:   5) gatsby.txt
 EXPECT:   6) quote.txt
+ACTUAL:   7) @> 
 

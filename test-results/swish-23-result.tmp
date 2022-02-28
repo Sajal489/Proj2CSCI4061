@@ -18,8 +18,10 @@ Run 'wc' with several command line arguments, redirecting both input and output.
 @> cat out.txt                                                    @> cat out.txt
   6772 51257 289900 299452 74                                   <
 @> exit                                                           @> exit
+                                                                > @> 
 #+END_SRC
 
 ** --- Line Differences ---
 EXPECT:   4)   6772 51257 289900 299452 74
+ACTUAL:   5) @> 
 
