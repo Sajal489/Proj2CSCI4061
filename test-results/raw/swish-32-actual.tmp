@@ -1,2 +1,0 @@
->> cat test_commands/32.txt | ./run_terminal_session | dos2unix
-bash: line 1: dos2unix: command not found

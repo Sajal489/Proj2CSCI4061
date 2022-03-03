@@ -1,5 +1,0 @@
->> cat test_commands/36.txt | ./run_terminal_session | dos2unix
-@> fg 0
-Job index out of bounds
-Failed to resume job in foreground
-@> exit

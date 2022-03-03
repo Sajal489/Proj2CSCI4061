@@ -1,8 +1,0 @@
->> echo foo > out.txt
->> cat test_commands/22.txt | ./run_terminal_session | dos2unix
-@> cat < test_data/quote.txt >> out.txt
-@> cat out.txt
-foo
-Premature optimization is the root of all evil.
-    -- Donald Knuth
-@> exit

@@ -66,11 +66,11 @@ int main(int argc, char **argv) {
             // TODO Task 1: Print the shell's current working directory
             // Use the getcwd() system call
 
-            char dir[CMD_LEN];//create buffer for the directory
+            char dir[CMD_LEN]; //create buffer for the directory
 
-            if(getcwd(dir, sizeof(dir)) != NULL){//get current working directory
+            if(getcwd(dir, sizeof(dir)) != NULL){ //get current working directory
                 printf("%s\n", dir);
-            }else{//error
+            }else{ //error
                 perror("getcwd");
             }
         }
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 
             char curdir[CMD_LEN];
             char file[CMD_LEN];
-     
+            memset(file, 0, sizeof(file));
 
             if(strvec_get(&tokens, 1) != NULL){
                 if(getcwd(curdir, sizeof(curdir)) == NULL) perror("getcwd");
@@ -92,11 +92,12 @@ int main(int argc, char **argv) {
                     if(strvec_get(&tokens, 1)[0] != '/'){
                         strcat(file, "/");
                         strcat(file, strvec_get(&tokens, 1));
+                        strcat(curdir, file);
                     }else if(strvec_get(&tokens, 1)[0] == '/'){
-                        strcpy(file, strvec_get(&tokens, 1));
+                        memset(curdir, 0, sizeof(curdir));
+                        strcpy(curdir, strvec_get(&tokens, 1));
                     }
-
-                    if(chdir(file) == -1){
+                    if(chdir(curdir) == -1){
                         perror("chdir");
                     }
                 }
@@ -110,7 +111,6 @@ int main(int argc, char **argv) {
                     }
                 }
             }
-            
         }
 
         else if (strcmp(first_token, "exit") == 0) {
@@ -173,12 +173,18 @@ int main(int argc, char **argv) {
             //   2. In the parent, use waitpid() to wait for the program to exit
 
             pid_t pid = fork();
-            if(pid == 0){
-                run_command(&tokens);
-            }else if(pid > 0){
+            if(pid == 0){ // child process
+                // if run_command returns 1, return 1
+                if(run_command(&tokens) == 1) {
+                    return 1;
+                }
+            }else if(pid > 0){ // parent process
                 int status = 0;
-                wait(&status);
-            }else{
+                waitpid(-1, &status, 0); // not sure what options to use here
+                if(!WIFEXITED(status)){ // exited abnormally. How are we supposed to handle this?
+                    return 1;
+                }
+            }else{ // an error occured in fork()
                 fprintf(stderr, "%s", "failed to fork child");
             }
 

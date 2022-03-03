@@ -40,6 +40,65 @@ int run_command(strvec_t *tokens) {
     // Hint: Build a string array from the 'tokens' vector and pass this into execvp()
     // Another Hint: You have a guarantee of the longest possible needed array, so you
     // won't have to use malloc.
+    
+    // initialize string array and either loop thru, or copy from vector
+    // dont forget null char at end
+    // run execvp with first array el as cmd, and then the whole array as args
+    // if exec fails, perror("exec") and return 1. otherwise nothing
+    char *child_argv[MAX_ARGS];
+    const char *first_token = strvec_get(tokens, 0);
+    if (first_token == NULL) { return 1; }
+    int i = 0;
+    char *arg = strvec_get(tokens, i);
+    while (arg != NULL) {
+        child_argv[i] = arg;
+        i++;
+        arg = strvec_get(tokens, i);
+    }
+    child_argv[i] = NULL;
+
+    // strvec_find() for < > and >>
+    int index = -1;
+    if ((index = strvec_find(tokens, "<")) != -1) {
+        int in_fd = open(child_argv[index+1], O_RDONLY); 
+        if (in_fd == -1) {
+            perror("Failed to open input file");
+            return 1;
+        }
+        dup2(in_fd, STDIN_FILENO);
+        // if (close(in_fd) == -1 ) { // do we need to close? check manual grading
+        //     perror("failed to close file");
+        //     return 1;
+        // }
+        child_argv[index] = NULL;
+        child_argv[index+1] = NULL;
+    }
+    if ((index = strvec_find(tokens, ">")) != -1) {
+        int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR|S_IWUSR); // not sure what other flags we need to use
+        if (out_fd == -1) {
+            perror("failed to open file");
+            return 1;
+        }
+        dup2(out_fd, STDOUT_FILENO); // need to error check these 
+        child_argv[index] = NULL;
+        child_argv[index+1] = NULL;
+
+    }
+    else if ((index = strvec_find(tokens, ">>")) != -1) {
+        int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT |O_APPEND, S_IRUSR|S_IWUSR);
+        if (out_fd == -1) {
+            perror("failed to open file");
+            return 1;
+        }
+        dup2(out_fd, STDOUT_FILENO);
+        child_argv[index] = NULL;
+        child_argv[index+1] = NULL;
+    }
+
+    if (execvp(first_token, child_argv) == -1) {
+        perror("exec");
+        return 1;
+    }
 
     // TODO Task 3: Extend this function to perform output redirection before exec()'ing
     // Check for '<' (redirect input), '>' (redirect output), '>>' (redirect and append output)
@@ -48,6 +107,7 @@ int run_command(strvec_t *tokens) {
     // Use dup2() to redirect stdin (<), stdout (> or >>)
     // DO NOT pass redirection operators and file names to exec()'d program
     // E.g., "ls -l > out.txt" should be exec()'d with strings "ls", "-l", NULL
+    
 
     // TODO Task 4: You need to do two items of setup before exec()'ing
     // 1. Restore the signal handlers for SIGTTOU and SIGTTIN to their defaults.

@@ -1,7 +1,0 @@
->> echo foo > out.txt
->> cat test_commands/19.txt | ./run_terminal_session | dos2unix
-@> wc -c -m -l -L -w test_data/gatsby.txt >> out.txt
-@> cat out.txt
-foo
-  6772 51257 289900 299452 74 test_data/gatsby.txt
-@> exit

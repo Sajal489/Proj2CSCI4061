@@ -1,3 +1,0 @@
->> cat test_commands/26.txt | ./run_terminal_session | dos2unix
-@> wc
-@> read: Input/output error

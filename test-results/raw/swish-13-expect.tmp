@@ -1,7 +1,0 @@
->> cat test_commands/13.txt | ./run_terminal_session | dos2unix
-@> cd test_data
-@> ls > ../out.txt
-@> cat ../out.txt
-gatsby.txt
-quote.txt
-@> exit

@@ -1,2 +1,0 @@
->> cat test_commands/1.txt | ./run_terminal_session | dos2unix
-@> exit

@@ -1,4 +1,0 @@
->> cat test_commands/15.txt | ./run_terminal_session | dos2unix
-@> wc < test_data/gatsby.txt
-  6772 51257 299452
-@> exit

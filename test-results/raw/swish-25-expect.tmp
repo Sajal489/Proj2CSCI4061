@@ -1,5 +1,0 @@
->> cat test_commands/25.txt | ./run_terminal_session | dos2unix
-@> wc
-@> echo foo
-foo
-@> exit

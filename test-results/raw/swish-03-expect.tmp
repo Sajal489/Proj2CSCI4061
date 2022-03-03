@@ -1,7 +1,0 @@
->> cat test_commands/3.txt | ./run_terminal_session | dos2unix
-@> pwd
-/mnt/d/My_Programs/School/csci4061/proj2-code/code
-@> cd test_data
-@> pwd
-/mnt/d/My_Programs/School/csci4061/proj2-code/code/test_data
-@> exit
