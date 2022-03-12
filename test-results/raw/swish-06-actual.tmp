@@ -1,7 +1,7 @@
 >> sed "s#__HOME_DIR__#$HOME#g" test_commands/6.txt | ./run_terminal_session | dos2unix
 @> pwd
-/mnt/d/My_Programs/School/csci4061/proj2-code/code
-@> cd /home/darkblade
+/home/aryal017/csci4061/Proj2CSCI4061
+@> cd /home/aryal017
 @> pwd
-/home/darkblade
+/home/aryal017
 @> exit

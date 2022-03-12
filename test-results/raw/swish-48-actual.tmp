@@ -1,2 +1,32 @@
 >> cat test_commands/48.txt | ./run_terminal_session | dos2unix
-bash: line 1: dos2unix: command not found
+@> ./slow_write 2 1 out.txt &
+@> jobs
+@> wc
+@> jobs
+0: wc (stopped)
+@> ./slow_write 3 0 out2.txt &
+@> jobs
+0: wc (stopped)
+@> wc
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+@> wait-all
+@> jobs
+0: wc (stopped)
+1: wc (stopped)
+@> cat out.txt
+1
+2
+@> cat out2.txt
+1
+2
+3
+@> fg 0
+      0       0       0
+@> jobs
+0: wc (stopped)
+@> fg 0
+      0       0       0
+@> jobs
+@> exit

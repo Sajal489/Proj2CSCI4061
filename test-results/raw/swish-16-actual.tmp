@@ -1,9 +1,11 @@
 >> rm -f out.txt
 >> cat test_commands/16.txt | ./run_terminal_session | dos2unix
 @> cd test_data
-chdir: No such file or directory
 @> ls >> ../out.txt
 @> ls >> ../out.txt
 @> cat ../out.txt
+gatsby.txt
+quote.txt
+gatsby.txt
+quote.txt
 @> exit
-@> 

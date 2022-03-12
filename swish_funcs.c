@@ -40,7 +40,22 @@ int run_command(strvec_t *tokens) {
     // Hint: Build a string array from the 'tokens' vector and pass this into execvp()
     // Another Hint: You have a guarantee of the longest possible needed array, so you
     // won't have to use malloc.
-
+    
+    // initialize string array and either loop thru, or copy from vector
+    // dont forget null char at end
+    // run execvp with first array el as cmd, and then the whole array as args
+    // if exec fails, perror("exec") and return 1. otherwise nothing
+    char *child_argv[MAX_ARGS];
+    const char *first_token = strvec_get(tokens, 0);
+    if (first_token == NULL) { return 1; }
+    int i = 0;
+    char *arg = strvec_get(tokens, i);
+    while (arg != NULL) {
+        child_argv[i] = arg;
+        i++;
+        arg = strvec_get(tokens, i);
+    }
+    child_argv[i] = NULL;
     // TODO Task 3: Extend this function to perform output redirection before exec()'ing
     // Check for '<' (redirect input), '>' (redirect output), '>>' (redirect and append output)
     // entries inside of 'tokens' (the strvec_find() function will do this for you)
@@ -49,6 +64,43 @@ int run_command(strvec_t *tokens) {
     // DO NOT pass redirection operators and file names to exec()'d program
     // E.g., "ls -l > out.txt" should be exec()'d with strings "ls", "-l", NULL
 
+    // strvec_find() for < > and >>
+    int index = -1;
+    if ((index = strvec_find(tokens, "<")) != -1) {
+        int in_fd = open(child_argv[index+1], O_RDONLY); 
+        if (in_fd == -1) {
+            perror("Failed to open input file");
+            return 1;
+        }
+        dup2(in_fd, STDIN_FILENO);
+        // if (close(in_fd) == -1 ) {
+        //     perror("failed to close file");
+        //     return 1;
+        // }
+        child_argv[index] = NULL;
+        child_argv[index+1] = NULL;
+    }
+    if ((index = strvec_find(tokens, ">")) != -1) {
+        int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR|S_IWUSR); // not sure what other flags we need to use
+        if (out_fd == -1) {
+            perror("failed to open file");
+            return 1;
+        }
+        dup2(out_fd, STDOUT_FILENO); // need to error check these 
+        child_argv[index] = NULL;
+        child_argv[index+1] = NULL;
+
+    }
+    else if ((index = strvec_find(tokens, ">>")) != -1) {
+        int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT |O_APPEND, S_IRUSR|S_IWUSR);
+        if (out_fd == -1) {
+            perror("failed to open file");
+            return 1;
+        }
+        dup2(out_fd, STDOUT_FILENO);
+        child_argv[index] = NULL;
+        child_argv[index+1] = NULL;
+    }
     // TODO Task 4: You need to do two items of setup before exec()'ing
     // 1. Restore the signal handlers for SIGTTOU and SIGTTIN to their defaults.
     // The code in main() within swish.c sets these handlers to the SIG_IGN value.
@@ -56,7 +108,25 @@ int run_command(strvec_t *tokens) {
     // 2. Change the process group of this process (a child of the main shell).
     // Call getpid() to get its process ID then call setpgid() and use this process
     // ID as the value for the new process group ID
+    struct sigaction sac;
+    sac.sa_handler = SIG_DFL;
+    if (sigfillset(&sac.sa_mask) == -1) {
+        perror("sigfillset");
+        return 1;
+    }
+    sac.sa_flags = 0;
+    if (sigaction(SIGTTIN, &sac, NULL) == -1 || sigaction(SIGTTOU, &sac, NULL) == -1) {
+        perror("sigaction");
+        return 1;
+    }
 
+    pid_t curpid = getpid();
+    setpgid(curpid, curpid);
+
+    if (execvp(first_token, child_argv) == -1) {
+        perror("exec");
+        return 1;
+    }
     // Not reachable after a successful exec(), but retain here to keep compiler happy
     return 0;
 }
@@ -72,6 +142,25 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground) {
     // 5. If the job has terminated (not stopped), remove it from the 'jobs' list
     // 6. Call tcsetpgrp(STDIN_FILENO, <shell_pid>). shell_pid is the *current*
     //    process's pid, since we call this function from the main shell process
+
+    for(int i = 1; i < tokens->length; i++){
+        job_t *curjob = job_list_get(jobs, atoi(strvec_get(tokens, i)));
+        if(curjob == NULL){
+            fprintf(stderr, "Job index out of bounds\n");
+            return 1;
+        }
+        tcsetpgrp(STDIN_FILENO, curjob->pid);
+        if(kill(curjob->pid, SIGCONT) == -1){
+            perror("kill failed");
+        }
+        int status = 0;
+        waitpid(-1, &status, WUNTRACED); 
+        tcsetpgrp(STDIN_FILENO, getpid());
+         if(WIFEXITED(status) || WIFSIGNALED(status)){
+            job_list_remove(jobs, atoi(strvec_get(tokens, i)));
+        }
+        tcsetpgrp(STDIN_FILENO, getpid());
+    }
 
     // TODO Task 6: Implement the ability to resume stopped jobs in the background.
     // This really just means omitting some of the steps used to resume a job in the foreground:

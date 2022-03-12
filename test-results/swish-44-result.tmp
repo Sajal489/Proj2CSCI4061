@@ -14,26 +14,17 @@ Use the 'wait-for' command to wait until a program finishes.
 #+BEGIN_SRC sbs-diff
 ==== EXPECT ====                                                  ==== ACTUAL ====                                               
 >> cat test_commands/44.txt | ./run_terminal_session | dos2unix   >> cat test_commands/44.txt | ./run_terminal_session | dos2unix
-@> ./slow_write 2 1 out.txt &                                   | bash: line 1: dos2unix: command not found
-@> jobs                                                         <
+@> ./slow_write 2 1 out.txt &                                     @> ./slow_write 2 1 out.txt &
+@> jobs                                                           @> jobs
 0: ./slow_write (background)                                    <
-@> wait-for 0                                                   <
-@> cat out.txt                                                  <
-1                                                               <
-2                                                               <
-@> jobs                                                         <
-@> exit                                                         <
+@> wait-for 0                                                     @> wait-for 0
+@> cat out.txt                                                    @> cat out.txt
+1                                                                 1
+2                                                                 2
+@> jobs                                                           @> jobs
+@> exit                                                           @> exit
 #+END_SRC
 
 ** --- Line Differences ---
-EXPECT:   2) @> ./slow_write 2 1 out.txt &
-EXPECT:   3) @> jobs
 EXPECT:   4) 0: ./slow_write (background)
-EXPECT:   5) @> wait-for 0
-EXPECT:   6) @> cat out.txt
-EXPECT:   7) 1
-EXPECT:   8) 2
-EXPECT:   9) @> jobs
-EXPECT:  10) @> exit
-ACTUAL:   2) bash: line 1: dos2unix: command not found
 
