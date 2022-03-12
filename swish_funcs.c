@@ -56,6 +56,8 @@ int run_command(strvec_t *tokens) {
         arg = strvec_get(tokens, i);
     }
     child_argv[i] = NULL;
+
+
     // TODO Task 3: Extend this function to perform output redirection before exec()'ing
     // Check for '<' (redirect input), '>' (redirect output), '>>' (redirect and append output)
     // entries inside of 'tokens' (the strvec_find() function will do this for you)
@@ -63,9 +65,10 @@ int run_command(strvec_t *tokens) {
     // Use dup2() to redirect stdin (<), stdout (> or >>)
     // DO NOT pass redirection operators and file names to exec()'d program
     // E.g., "ls -l > out.txt" should be exec()'d with strings "ls", "-l", NULL
+    
 
     // strvec_find() for < > and >>
-    int index = -1;
+     int index = -1;
     if ((index = strvec_find(tokens, "<")) != -1) {
         int in_fd = open(child_argv[index+1], O_RDONLY); 
         if (in_fd == -1) {
