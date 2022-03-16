@@ -173,28 +173,51 @@ int main(int argc, char **argv) {
             //   2. Call run_command() in the child process
             //   2. In the parent, use waitpid() to wait for the program to exit
 
-            // TODO Task 4: Set the child process as the target of signals sent to the terminal
-            // via the keyboard.
-            // To do this, call 'tcsetpgrp(STDIN_FILENO, <child_pid>)', where child_pid is the
-            // child's process ID just returned by fork(). Do this in the parent process.
-            pid_t pid = fork();
-            if(pid == 0){ // child process
-                // if run_command returns 1, return 1
-                if(run_command(&tokens) == 1) {
-                    return 1;
-                }
-            }else if(pid > 0){ // parent process
-                int status = 0;
-                tcsetpgrp(STDIN_FILENO, pid);
-                waitpid(-1, &status, WUNTRACED); // not sure what options to use here
-                if(WIFSTOPPED(status)){
+            // TODO Task 6: If the last token input by the user is "&", start the current
+            // command in the background.
+            // 1. Determine if the last token is "&". If present, use strvec_take() to remove
+            //    the "&" from the token list.
+            // 2. Modify the code for the parent (shell) process: Don't use tcsetpgrp() or
+            //    use waitpid() to interact with the newly spawned child process.
+            // 3. Add a new entry to the jobs list with the child's pid, program name,
+            //    and status JOB_BACKGROUND.
+            const char *last_token = strvec_get(&tokens, tokens.length - 1);
+            if (*last_token == '&') { // run process in background
+                strvec_take(&tokens, tokens.length); // need to error check these strvec calls
+
+                pid_t pid = fork();
+                if (pid == 0) {  // child process
+                    if(run_command(&tokens) == 1) {  // still need this for background job launching, right?
+                        return 1;
+                    }
+                } else if (pid > 0) {
+                    int status = JOB_BACKGROUND;
                     job_list_add(&jobs, pid, first_token, status);
                 }
-                tcsetpgrp(STDIN_FILENO, getpid());
-            }else{ // an error occured in fork()
-                fprintf(stderr, "%s", "failed to fork child");
-            }
 
+            } else {  // run as normal, in foreground
+                // TODO Task 4: Set the child process as the target of signals sent to the terminal
+                // via the keyboard.
+                // To do this, call 'tcsetpgrp(STDIN_FILENO, <child_pid>)', where child_pid is the
+                // child's process ID just returned by fork(). Do this in the parent process.
+                pid_t pid = fork();
+                if(pid == 0){  // child process
+                    // if run_command returns 1, return 1
+                    if(run_command(&tokens) == 1) {
+                        return 1;
+                    }
+                }else if(pid > 0){ // parent process
+                    int status = 0;
+                    tcsetpgrp(STDIN_FILENO, pid); // need to error check this?
+                    waitpid(pid, &status, WUNTRACED); // not sure what options to use here
+                    if(WIFSTOPPED(status)){
+                        job_list_add(&jobs, pid, first_token, status);
+                    }
+                    tcsetpgrp(STDIN_FILENO, getpid());
+                }else{ // an error occured in fork()
+                    fprintf(stderr, "%s", "failed to fork child");
+                }
+            }
 
             // TODO Task 5: Handle the issue of foreground/background terminal process groups.
             // Do this by taking the following steps in the shell (parent) process:
@@ -207,14 +230,8 @@ int main(int argc, char **argv) {
             // You can detect if this has occurred using WIFSTOPPED on the status
             // variable set by waitpid()
 
-            // TODO Task 6: If the last token input by the user is "&", start the current
-            // command in the background.
-            // 1. Determine if the last token is "&". If present, use strvec_take() to remove
-            //    the "&" from the token list.
-            // 2. Modify the code for the parent (shell) process: Don't use tcsetpgrp() or
-            //    use waitpid() to interact with the newly spawned child process.
-            // 3. Add a new entry to the jobs list with the child's pid, program name,
-            //    and status JOB_BACKGROUND.
+
+
         }
 
         strvec_clear(&tokens);

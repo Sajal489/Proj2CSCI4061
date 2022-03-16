@@ -84,7 +84,7 @@ int run_command(strvec_t *tokens) {
         child_argv[index+1] = NULL;
     }
     if ((index = strvec_find(tokens, ">")) != -1) {
-        int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR|S_IWUSR); // not sure what other flags we need to use
+        int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR|S_IWUSR);
         if (out_fd == -1) {
             perror("failed to open file");
             return 1;
@@ -112,7 +112,13 @@ int run_command(strvec_t *tokens) {
     // Call getpid() to get its process ID then call setpgid() and use this process
     // ID as the value for the new process group ID
     struct sigaction sac;
-    sac.sa_handler = SIG_DFL;
+    sac.sa_handler = SIG_DFL; 
+
+    if (sigemptyset(&sac.sa_mask) == -1) {
+        perror("sigemptyset");
+        return 1;
+    }
+
     if (sigfillset(&sac.sa_mask) == -1) {
         perror("sigfillset");
         return 1;
@@ -123,7 +129,7 @@ int run_command(strvec_t *tokens) {
         return 1;
     }
 
-    pid_t curpid = getpid();
+    pid_t curpid = getpid(); // error check these?
     setpgid(curpid, curpid);
 
     if (execvp(first_token, child_argv) == -1) {
@@ -145,26 +151,39 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground) {
     // 5. If the job has terminated (not stopped), remove it from the 'jobs' list
     // 6. Call tcsetpgrp(STDIN_FILENO, <shell_pid>). shell_pid is the *current*
     //    process's pid, since we call this function from the main shell process
-
-    for(int i = 1; i < tokens->length; i++){
-        job_t *curjob = job_list_get(jobs, atoi(strvec_get(tokens, i)));
-        if(curjob == NULL){
-            fprintf(stderr, "Job index out of bounds\n");
-            return 1;
+    if (is_foreground) { // anything not 0 is true. is_foreground should be 1 for foreground
+        for(int i = 1; i < tokens->length; i++){
+            job_t *curjob = job_list_get(jobs, atoi(strvec_get(tokens, i)));
+            if(curjob == NULL){
+                fprintf(stderr, "Job index out of bounds\n");
+                return 1;
+            }
+            tcsetpgrp(STDIN_FILENO, curjob->pid);
+            if(kill(curjob->pid, SIGCONT) == -1){
+                perror("kill failed");
+            }
+            int status = 0;
+            waitpid(curjob->pid, &status, WUNTRACED); 
+            tcsetpgrp(STDIN_FILENO, getpid());
+            if(WIFEXITED(status) || WIFSIGNALED(status)){
+                job_list_remove(jobs, atoi(strvec_get(tokens, i)));
+            }
+            tcsetpgrp(STDIN_FILENO, getpid());
         }
-        tcsetpgrp(STDIN_FILENO, curjob->pid);
-        if(kill(curjob->pid, SIGCONT) == -1){
-            perror("kill failed");
+    } else {  // resume as a background process
+        for (int i = 1; i < tokens->length; i++){
+            job_t *curjob = job_list_get(jobs, atoi(strvec_get(tokens, i)));
+            if(curjob == NULL){
+                fprintf(stderr, "Job index out of bounds\n");
+                return 1;
+            }
+            if(kill(curjob->pid, SIGCONT) == -1){
+                perror("kill failed");
+            }
+            int status = JOB_BACKGROUND;
+            curjob->status = status;
         }
-        int status = 0;
-        waitpid(-1, &status, WUNTRACED); 
-        tcsetpgrp(STDIN_FILENO, getpid());
-         if(WIFEXITED(status) || WIFSIGNALED(status)){
-            job_list_remove(jobs, atoi(strvec_get(tokens, i)));
-        }
-        tcsetpgrp(STDIN_FILENO, getpid());
     }
-
     // TODO Task 6: Implement the ability to resume stopped jobs in the background.
     // This really just means omitting some of the steps used to resume a job in the foreground:
     // 1. DO NOT call tcsetpgrp() to manipulate foreground/background terminal process group
@@ -179,9 +198,30 @@ int await_background_job(strvec_t *tokens, job_list_t *jobs) {
     // TODO Task 6: Wait for a specific job to stop or terminate
     // 1. Look up the relevant job information (in a job_t) from the jobs list
     //    using the index supplied by the user (in tokens index 1)
+    unsigned idx = atoi(strvec_get(tokens, 1));
+
+    job_t *job = job_list_get(jobs, idx);
+    // perform bound checking w/ the index
+    if (job == NULL) {
+        fprintf(stderr, "Job index out of bounds\n");
+        return 1;
+    }
+
     // 2. Make sure the job's status is JOB_BACKGROUND (no sense waiting for a stopped job)
+    if (job->status == JOB_BACKGROUND) {
     // 3. Use waitpid() to wait for the job to terminate, as you have in resume_job() and main().
+        int status;
+        waitpid(job->pid, &status, WUNTRACED);
     // 4. If the process terminates (is not stopped by a signal) remove it from the jobs list
+        if(WIFEXITED(status)){
+            job_list_remove(jobs, idx);
+        }
+
+    } else { 
+        fprintf(stderr, "Job index is for stopped process not background process\n");
+        return 1;
+    }
+
 
     return 0;
 }
@@ -195,6 +235,24 @@ int await_all_background_jobs(job_list_t *jobs) {
     //    next step (don't attempt to remove it while iterating through the list).
     // 4. Remove all background jobs (which have all just terminated) from jobs list.
     //    Use the job_list_remove_by_status() function.
+    unsigned len = jobs->length;
+    for (int i = 0; i < len; i++) {
+        job_t *curjob = job_list_get(jobs, i);
+        if (curjob == NULL){
+            fprintf(stderr, "Job index out of bounds\n");
+            return 1;
+        }
+        if (curjob->status == JOB_BACKGROUND) { 
+            int status;
+            waitpid(curjob->pid, &status, WUNTRACED);
 
+            if (WIFSTOPPED(status)) {
+                curjob->status = JOB_STOPPED;
+            }
+        }
+    }
+
+    // remove all background jobs
+    job_list_remove_by_status(jobs, JOB_BACKGROUND);
     return 0;
 }

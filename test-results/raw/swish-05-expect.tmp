@@ -1,16 +1,16 @@
 >> cat test_commands/5.txt | ./run_terminal_session | dos2unix
 @> pwd
-/home/aryal017/csci4061/Proj2CSCI4061
+/home/nguy3856/CSCI4061/Proj2CSCI4061
 @> cd test_data
 @> pwd
-/home/aryal017/csci4061/Proj2CSCI4061/test_data
+/home/nguy3856/CSCI4061/Proj2CSCI4061/test_data
 @> cd ..
 @> pwd
-/home/aryal017/csci4061/Proj2CSCI4061
+/home/nguy3856/CSCI4061/Proj2CSCI4061
 @> cd test_data
 @> pwd
-/home/aryal017/csci4061/Proj2CSCI4061/test_data
+/home/nguy3856/CSCI4061/Proj2CSCI4061/test_data
 @> cd ..
 @> pwd
-/home/aryal017/csci4061/Proj2CSCI4061
+/home/nguy3856/CSCI4061/Proj2CSCI4061
 @> exit
