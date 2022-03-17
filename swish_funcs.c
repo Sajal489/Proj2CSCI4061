@@ -34,62 +34,61 @@ int tokenize(char *s, strvec_t *tokens) {
 }
 
 int run_command(strvec_t *tokens) {
-    // TODO Task 2: Execute the specified program (token 0) with the
-    // specified command-line arguments
-    // THIS FUNCTION SHOULD BE CALLED FROM A CHILD OF THE MAIN SHELL PROCESS
+
+    // TASK 2: 
     // Hint: Build a string array from the 'tokens' vector and pass this into execvp()
     // Another Hint: You have a guarantee of the longest possible needed array, so you
     // won't have to use malloc.
-    
-    // initialize string array and either loop thru, or copy from vector
-    // dont forget null char at end
-    // run execvp with first array el as cmd, and then the whole array as args
-    // if exec fails, perror("exec") and return 1. otherwise nothing
     char *child_argv[MAX_ARGS];
+
+    // TODO Task 2: Execute the specified program (token 0) with the
+    // specified command-line arguments
+    // THIS FUNCTION SHOULD BE CALLED FROM A CHILD OF THE MAIN SHELL PROCESS
     const char *first_token = strvec_get(tokens, 0);
     if (first_token == NULL) { return 1; }
     int i = 0;
-    char *arg = strvec_get(tokens, i);
+    char *arg = strvec_get(tokens, i);  // don't need to error check again
+
     while (arg != NULL) {
         child_argv[i] = arg;
         i++;
         arg = strvec_get(tokens, i);
     }
     child_argv[i] = NULL;
-
-
-    // TODO Task 3: Extend this function to perform output redirection before exec()'ing
+ 
+    // TASK 3: Extend this function to perform output redirection before exec()'ing
     // Check for '<' (redirect input), '>' (redirect output), '>>' (redirect and append output)
     // entries inside of 'tokens' (the strvec_find() function will do this for you)
-    // Open the necessary file for reading (<), writing (>), or appending (>>)
-    // Use dup2() to redirect stdin (<), stdout (> or >>)
-    // DO NOT pass redirection operators and file names to exec()'d program
-    // E.g., "ls -l > out.txt" should be exec()'d with strings "ls", "-l", NULL
-    
-
-    // strvec_find() for < > and >>
-     int index = -1;
+    int index = -1;
     if ((index = strvec_find(tokens, "<")) != -1) {
+
+        // TASK 3:
+        // Open the necessary file for reading (<), writing (>), or appending (>>)
         int in_fd = open(child_argv[index+1], O_RDONLY); 
         if (in_fd == -1) {
             perror("Failed to open input file");
             return 1;
         }
-        dup2(in_fd, STDIN_FILENO);
-        // if (close(in_fd) == -1 ) {
-        //     perror("failed to close file");
-        //     return 1;
-        // }
+
+        // TASK 3:
+        // Use dup2() to redirect stdin (<), stdout (> or >>)
+        if (dup2(in_fd, STDIN_FILENO) == -1) {
+            perror("dup2");
+            return 1;
+        }
         child_argv[index] = NULL;
         child_argv[index+1] = NULL;
     }
     if ((index = strvec_find(tokens, ">")) != -1) {
         int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR|S_IWUSR);
         if (out_fd == -1) {
-            perror("failed to open file");
+            perror("failed to open output file for writing");
             return 1;
         }
-        dup2(out_fd, STDOUT_FILENO); // need to error check these 
+        if (dup2(out_fd, STDOUT_FILENO) == -1) {
+            perror("dup2");
+            return 1;
+        }
         child_argv[index] = NULL;
         child_argv[index+1] = NULL;
 
@@ -97,40 +96,46 @@ int run_command(strvec_t *tokens) {
     else if ((index = strvec_find(tokens, ">>")) != -1) {
         int out_fd = open(child_argv[index+1], O_WRONLY | O_CREAT |O_APPEND, S_IRUSR|S_IWUSR);
         if (out_fd == -1) {
-            perror("failed to open file");
+            perror("failed to open output file for appending");
             return 1;
         }
-        dup2(out_fd, STDOUT_FILENO);
+        if (dup2(out_fd, STDOUT_FILENO) == -1) {
+            perror("dup2");
+            return 1;
+        }
         child_argv[index] = NULL;
         child_argv[index+1] = NULL;
     }
-    // TODO Task 4: You need to do two items of setup before exec()'ing
+
+    // TASK 4: You need to do two items of setup before exec()'ing
     // 1. Restore the signal handlers for SIGTTOU and SIGTTIN to their defaults.
     // The code in main() within swish.c sets these handlers to the SIG_IGN value.
     // Adapt this code to use sigaction() to set the handlers to the SIG_DFL value.
-    // 2. Change the process group of this process (a child of the main shell).
-    // Call getpid() to get its process ID then call setpgid() and use this process
-    // ID as the value for the new process group ID
     struct sigaction sac;
     sac.sa_handler = SIG_DFL; 
-
+    sac.sa_flags = 0;
     if (sigemptyset(&sac.sa_mask) == -1) {
         perror("sigemptyset");
         return 1;
     }
-
     if (sigfillset(&sac.sa_mask) == -1) {
         perror("sigfillset");
         return 1;
     }
-    sac.sa_flags = 0;
     if (sigaction(SIGTTIN, &sac, NULL) == -1 || sigaction(SIGTTOU, &sac, NULL) == -1) {
         perror("sigaction");
         return 1;
     }
 
-    pid_t curpid = getpid(); // error check these?
-    setpgid(curpid, curpid);
+    // TASK 4:
+    // 2. Change the process group of this process (a child of the main shell).
+    // Call getpid() to get its process ID then call setpgid() and use this process
+    // ID as the value for the new process group ID
+    pid_t curpid = getpid();  // man pages say this is always successful
+    if (setpgid(curpid, curpid) == -1) {
+        perror("setpgid");
+        return 1;
+    }
 
     if (execvp(first_token, child_argv) == -1) {
         perror("exec");
@@ -195,46 +200,50 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground) {
 }
 
 int await_background_job(strvec_t *tokens, job_list_t *jobs) {
-    // TODO Task 6: Wait for a specific job to stop or terminate
+    // TASK 6: Wait for a specific job to stop or terminate
     // 1. Look up the relevant job information (in a job_t) from the jobs list
     //    using the index supplied by the user (in tokens index 1)
     unsigned idx = atoi(strvec_get(tokens, 1));
-
     job_t *job = job_list_get(jobs, idx);
-    // perform bound checking w/ the index
+
+    // TASK 6:
+    // Perform bound checking w/ the index
     if (job == NULL) {
         fprintf(stderr, "Job index out of bounds\n");
         return 1;
     }
 
+    // TASK 6:
     // 2. Make sure the job's status is JOB_BACKGROUND (no sense waiting for a stopped job)
     if (job->status == JOB_BACKGROUND) {
-    // 3. Use waitpid() to wait for the job to terminate, as you have in resume_job() and main().
+
+        // TASK 6:
+        // 3. Use waitpid() to wait for the job to terminate, as you have in resume_job() and main().
         int status;
-        waitpid(job->pid, &status, WUNTRACED);
-    // 4. If the process terminates (is not stopped by a signal) remove it from the jobs list
-        if(WIFEXITED(status)){
-            job_list_remove(jobs, idx);
+        if (waitpid(job->pid, &status, WUNTRACED) == -1) {
+            perror("failed to wait");
+            return 1;
         }
 
+        // TASK 6:
+        // 4. If the process terminates (is not stopped by a signal) remove it from the jobs list
+        if(WIFEXITED(status)){
+            if (job_list_remove(jobs, idx) == 1) {
+                fprintf(stderr, "%s", "failed to remove job");
+                return 1;
+            }
+        }
     } else { 
         fprintf(stderr, "Job index is for stopped process not background process\n");
         return 1;
     }
-
-
     return 0;
 }
 
 int await_all_background_jobs(job_list_t *jobs) {
-    // TODO Task 6: Wait for all background jobs to stop or terminate
+
+    // TASK 6: Wait for all background jobs to stop or terminate
     // 1. Iterate throught the jobs list, ignoring any stopped jobs
-    // 2. For a background job, call waitpid() with WUNTRACED.
-    // 3. If the job has stopped (check with WIFSTOPPED), change its
-    //    status to JOB_STOPPED. If the job has terminated, do nothing until the
-    //    next step (don't attempt to remove it while iterating through the list).
-    // 4. Remove all background jobs (which have all just terminated) from jobs list.
-    //    Use the job_list_remove_by_status() function.
     unsigned len = jobs->length;
     for (int i = 0; i < len; i++) {
         job_t *curjob = job_list_get(jobs, i);
@@ -242,17 +251,29 @@ int await_all_background_jobs(job_list_t *jobs) {
             fprintf(stderr, "Job index out of bounds\n");
             return 1;
         }
+
+        // TASK 6:
+        // 2. For a background job, call waitpid() with WUNTRACED.
         if (curjob->status == JOB_BACKGROUND) { 
             int status;
-            waitpid(curjob->pid, &status, WUNTRACED);
+            if (waitpid(curjob->pid, &status, WUNTRACED) == -1) {
+                perror("failed to wait");
+                return 1;
+            }
 
+            // TASK 6:
+            // 3. If the job has stopped (check with WIFSTOPPED), change its
+            //    status to JOB_STOPPED. If the job has terminated, do nothing until the
+            //    next step (don't attempt to remove it while iterating through the list).
             if (WIFSTOPPED(status)) {
                 curjob->status = JOB_STOPPED;
             }
         }
     }
 
-    // remove all background jobs
+    // TASK 6:
+    // 4. Remove all background jobs (which have all just terminated) from jobs list.
+    //    Use the job_list_remove_by_status() function.
     job_list_remove_by_status(jobs, JOB_BACKGROUND);
     return 0;
 }
