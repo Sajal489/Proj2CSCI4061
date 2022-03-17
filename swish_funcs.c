@@ -24,10 +24,16 @@ int tokenize(char *s, strvec_t *tokens) {
 
     char *token = strtok(s, " ");
 
-    strvec_add(tokens, token);
+    if(strvec_add(tokens, token) == 1){
+        printf("error adding token");
+        return 1;
+    }
 
     while((token = strtok(NULL, " ")) != NULL){
-        if(strvec_add(tokens, token) == -1)return 1;
+        if(strvec_add(tokens, token) == -1){
+            printf("error adding token");
+            return 1;
+        }
     }
 
     return 0;
@@ -129,8 +135,11 @@ int run_command(strvec_t *tokens) {
         return 1;
     }
 
-    pid_t curpid = getpid(); // error check these?
-    setpgid(curpid, curpid);
+    pid_t curpid = getpid(); //always successful so no need for error checking
+    if(setpgid(curpid, curpid) == -1){
+        perror("setpgid failed");
+        return 1;
+    }
 
     if (execvp(first_token, child_argv) == -1) {
         perror("exec");
@@ -158,17 +167,29 @@ int resume_job(strvec_t *tokens, job_list_t *jobs, int is_foreground) {
                 fprintf(stderr, "Job index out of bounds\n");
                 return 1;
             }
-            tcsetpgrp(STDIN_FILENO, curjob->pid);
+            if(tcsetpgrp(STDIN_FILENO, curjob->pid) == 1){
+                perror("tcsetpgrp failed");
+                return 1;
+            }
             if(kill(curjob->pid, SIGCONT) == -1){
                 perror("kill failed");
             }
             int status = 0;
-            waitpid(curjob->pid, &status, WUNTRACED); 
-            tcsetpgrp(STDIN_FILENO, getpid());
+            if(waitpid(curjob->pid, &status, WUNTRACED) == -1){
+                perror("waitpid failed");
+                return 1;
+            } 
+            if(tcsetpgrp(STDIN_FILENO, getpid()) == -1){
+                perror("tcsetpgrp failed");
+                return 1;
+            }
             if(WIFEXITED(status) || WIFSIGNALED(status)){
                 job_list_remove(jobs, atoi(strvec_get(tokens, i)));
             }
-            tcsetpgrp(STDIN_FILENO, getpid());
+            if(tcsetpgrp(STDIN_FILENO, getpid()) == -1){
+                perror("tcsetpgrp failed");
+                return 1;
+            }
         }
     } else {  // resume as a background process
         for (int i = 1; i < tokens->length; i++){

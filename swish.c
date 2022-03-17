@@ -208,12 +208,21 @@ int main(int argc, char **argv) {
                     }
                 }else if(pid > 0){ // parent process
                     int status = 0;
-                    tcsetpgrp(STDIN_FILENO, pid); // need to error check this?
-                    waitpid(pid, &status, WUNTRACED); // not sure what options to use here
+                    if(tcsetpgrp(STDIN_FILENO, pid) == -1){
+                        printf("tcsetpgrp failed");
+                        return 1;
+                    }
+                    if(waitpid(pid, &status, WUNTRACED) == -1){
+                        perror("waitpid failed");
+                        return 1;
+                    } 
                     if(WIFSTOPPED(status)){
                         job_list_add(&jobs, pid, first_token, status);
                     }
-                    tcsetpgrp(STDIN_FILENO, getpid());
+                    if(tcsetpgrp(STDIN_FILENO, getpid()) == -1){
+                        printf("tcsetpgrp failed");
+                        return 1;
+                    }
                 }else{ // an error occured in fork()
                     fprintf(stderr, "%s", "failed to fork child");
                 }

@@ -1,12 +1,12 @@
 >> sed "s#__HOME_DIR__#$HOME#g" test_commands/7.txt | ./run_terminal_session | dos2unix
 @> pwd
-/home/nguy3856/CSCI4061/Proj2CSCI4061
+/home/aryal017/csci4061/Proj2CSCI4061
 @> cd /
 @> pwd
 /
-@> cd /home/nguy3856
+@> cd /home/aryal017
 @> pwd
-/home/nguy3856
+/home/aryal017
 @> cd /
 @> pwd
 /

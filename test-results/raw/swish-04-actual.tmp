@@ -1,7 +1,7 @@
 >> cat test_commands/4.txt | ./run_terminal_session | dos2unix
 @> pwd
-/home/nguy3856/CSCI4061/Proj2CSCI4061
+/home/aryal017/csci4061/Proj2CSCI4061
 @> cd
 @> pwd
-/home/nguy3856
+/home/aryal017
 @> exit
