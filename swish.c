@@ -243,6 +243,10 @@ int main(int argc, char **argv) {
                             fprintf(stderr, "%s", "failed to add job");
                         }
                     }
+                    if(tcsetpgrp(STDIN_FILENO, getpid()) == -1){
+                        printf("tcsetpgrp failed");
+                        return 1;
+                    }
                 }else{ // an error occured in fork()
                     fprintf(stderr, "%s", "failed to fork child");
                 }
